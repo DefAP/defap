@@ -33,7 +33,7 @@ import platform
 # Materials 26 (2014) 1629-1638.                    # 
 #                                                   #
 # If you encounter any problems with this script    #
-# please contact: william.neilson@lancaster.ac.uk   #
+# please contact: w.neilson@lancaster.ac.uk         #
 #                                                   #
 #####################################################
 #                                                   #
