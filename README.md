@@ -8,7 +8,7 @@ DefAP is a Python (Python 3.6.9 tested) code that runs in a command-line interfa
 - numpy
 - scipy
 
-A gnuplot installation is also required (tested with gnuplot v5.2) as well as GV (tested with gv 3.7.4) if using a Linux system and want to automatically view plots.  
+A gnuplot installation is also required (tested with gnuplot v5.2) and, if using a Linux system and want to automatically view plots, a GV installation (tested with gv 3.7.4).  
 
 ## Usage
 
