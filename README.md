@@ -4,7 +4,7 @@ DefAP is a program developed to facilitate the exploration of a material's defec
 
 ## Installation
 
-DefAP is a Python (Python 3.6.9 tested) code that runs in a command-line interface using Linux (tested on Ubuntu 18.04.5 LTS) or MacOS (tested on ...). The following modules are required. 
+DefAP is a Python (Python 3.6.9 tested) code that runs in a command-line interface using Linux (tested on Ubuntu 18.04.5 LTS) or MacOS (tested on ...). The following modules are required:
 - numpy
 - scipy
 
