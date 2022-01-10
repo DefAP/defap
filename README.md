@@ -1,4 +1,4 @@
-### The Defect Analysis Package (DefAP)
+## The Defect Analysis Package (DefAP)
 
 DefAP is a program developed to facilitate the exploration of a material's defect chemistry. A large number of features are provided and rapid exploration is supported through the use of autoplotting with carefully considered automatic data labelling and simplification options enabling production of publication quality plots. 
 
