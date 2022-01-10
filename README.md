@@ -26,4 +26,4 @@ Samuel T. Murphy and Nicholas D. M. Hine, Chem. Mater. 2014, 26, 4, 1629–1638
 A new publication detailing the full methods of DefAP will be available soon. 
 
 ## Contact
-Questions, remarks, contributions and advices should be addressed to wdneilson@outlook.com and samuel.murphy@lancaster.ac.uk
+Questions, remarks and contributions should be addressed to wdneilson@outlook.com and samuel.murphy@lancaster.ac.uk
