@@ -15,10 +15,11 @@ A gnuplot installation is also required (tested with gnuplot v5.2) as well as GV
 To operate DefAP, please consult the operating manual included in the software. 
 
 ## Authors
-Mr. William Neilson
-Dr. Samuel Murphy
+- Mr. William Neilson
+- Dr. Samuel Murphy
 
 For work produced using DefAP, please cite: 
+
 Point Defects and Non-stoichiometry in Li2TiO3
 Samuel T. Murphy and Nicholas D. M. Hine, Chem. Mater. 2014, 26, 4, 1629–1638, https://doi.org/10.1021/cm4038473
 
