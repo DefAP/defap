@@ -20,8 +20,7 @@ To operate DefAP, please consult the operating manual included in the software.
 
 For work produced using DefAP, please cite: 
 
-Point Defects and Non-stoichiometry in Li2TiO3
-
+Point Defects and Non-stoichiometry in Li2TiO3.
 Samuel T. Murphy and Nicholas D. M. Hine, Chem. Mater. 2014, 26, 4, 1629–1638, https://doi.org/10.1021/cm4038473
 
 A new publication detailing the full methods of DefAP will be available soon. 
