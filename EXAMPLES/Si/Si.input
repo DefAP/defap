@@ -1,0 +1,54 @@
+Input file for the Defect Analysis Package
+
+#List of tasks to perform
+tasks : energy form_plots brouwer autodisplay
+
+#Independent variable for brouwer task
+loop = 1
+
+#Range for defect diagram
+min_value = 100
+max_value = 500
+iterator = 20
+Charge_convergence : 0.00000000000000001
+
+#Define the host properties
+Host : Si
+Host_energy : -5.425776852 eV
+Host_supercell : -1171.9678 eV
+E_VBM : 5.56951365 eV
+
+#Selection of method to calculate chemical potentials
+chem_pot_method : defined
+
+#Method selection for carrier concentrations
+Electron_method : Effective_masses [[4.2,1.06],[50,1.06],[100,1.06],[150,1.07],[200,1.08],[250,1.08],[300,1.09],[350,1.10],[400,1.11],[450,1.12],[500,1.13]]
+Hole_method : Effective_masses [[4.2,0.59],[50,0.69],[100,0.83],[150,0.95],[200,1.03],[250,1.10],[300,1.15],[350,1.19],[400,1.23],[450,1.29],[500,1.29]]
+fu_unit_cell = 8
+Volume_unit_cell : 163.79786
+
+#Constituents listed as required for 'defined' chemical potential method
+Constituents 1
+Si -5.425776852
+
+#Fixed temperature (if temperature not the variable)
+Temperature = 273
+
+#Corrections
+Coulombic_correction : 1
+Length : 16.41
+Dielectric_constant : 11.9
+
+#Define electronic properties.
+Bandgap : 1.11 eV
+
+#Dopants
+Dopant_table : 1
+P P -5 2 4.9e-8 5
+
+#Method to calculate defect concentrations
+Defect_conc_method : Boltzmann
+
+#Plotting preferences
+min_y_range : -30
+

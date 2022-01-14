@@ -1,0 +1,56 @@
+Input file for the Defect Analysis Package
+
+#List of tasks to perform
+tasks : energy form_plots brouwer autodisplay
+
+#Independent variable for brouwer task
+loop = 0
+
+#Request for stoichiometry to be calculated and plotted
+Stoichiometry : 1
+
+#Range for defect diagram
+min_value = -40
+max_value = 0
+iterator = 0.5
+
+#Define the host properties 
+Host : Pu-O_2
+Host_energy : -35.8748 eV
+Host_supercell : -1147.9941 eV
+E_VBM : 7.933220192 eV 
+
+#Selection of method to calculate chemical potentials
+chem_pot_method : volatile
+#Request for oxygen to be treated as a real gas when calculating chemical potential temperature dependence
+real_gas = 1
+
+#Method selection for carrier concentrations
+Electron_method : Fermi-Dirac
+Hole_method : Fermi-Dirac
+
+#Limits of intergration for DOS file
+Valence_band_limits : -5.2 0
+Conduction_band_limits : 3.04 4.9 
+
+#Constituents listed as required for 'volatile' chemical potential method
+Constituents 
+O -1
+Pu-O_2  -35.8748 -16.56520623 -10.943 
+
+#Fixed temperature (if temperature not the variable)
+Temperature = 1000
+
+#Define electronic properties.
+Bandgap : 3.04 eV
+
+#Entrop contribution selection
+entropy : 1
+entropy_units : 256
+
+#Method to calculate defect concentrations
+Defect_conc_method : Boltzmann
+
+#Plotting preferences
+min_y_range : -20
+

@@ -1,0 +1,59 @@
+Input file for the Defect Analysis Package
+
+#List of tasks to perform
+tasks : energy form_plots brouwer group stability autodisplay
+
+#Independent variable for brouwer task
+loop = 0
+
+#Request for stoichiometry to be calculated and plotted
+Stoichiometry : 1
+
+#Range for defect diagram
+min_value = -20
+max_value = 0
+iterator = 0.1
+
+#Define the host properties 
+Host : Y-Ba_2-Cu_3-O_7
+Host_energy : -11259.08217828 eV
+Host_supercell : -180146.7988847 eV
+
+#Selection of method to calculate chemical potentials
+chem_pot_method : volatile-rich-poor
+#Request for oxygen to be treated as a real gas when calculating chemical potential temperature dependence
+real_gas = 1
+
+#Method selection for carrier concentrations
+Electron_method : Off
+Hole_method : Off
+
+#Constituents listed as required for 'volatile-rich-poor' chemical potential method
+Constituents 
+O 2 -4.0
+Y_2-O_3 0.5 -3475.90880604 -1072.4301564025 -18.8278903456496 1
+Ba-O 2 -1470.908217608 -1028.2631771885 -5.39339793750324 1
+Cu_2-O 1.5 -3800.773619044 -1680.9293809865 -1.53288075866715 0
+
+#Fixed temperature (if temperature not the variable)
+Temperature = 700
+
+#Phase entry for stability task
+Stability_check : 10
+Y-Cu-O_2        -3638.343216
+Y-Cu_2-O_4      -6196.709592
+Ba-Cu_3-O_4     -7830.560771
+Y_2-Ba-O_4      -4946.912003
+Y_4-Ba_3-O_9    -11364.46251
+Ba-Cu           -2709.325232
+Cu-Y            -2753.812613
+Cu_5-Y          -9478.189405
+Cu_2-Ba-O_2     -5272.176675
+Ba_2-Cu_3-O_6   -9740.77808
+
+#Method to calculate defect concentrations
+Defect_conc_method : Boltzmann
+
+#Plotting preferences
+min_y_range : -10
+x_variable = 1

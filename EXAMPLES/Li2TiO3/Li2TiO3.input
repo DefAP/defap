@@ -1,0 +1,58 @@
+Input file for the Defect Analysis Package
+
+#List of tasks to perform
+tasks : energy form_plots brouwer group autodisplay
+
+#Independent variable for brouwer task
+loop = 0
+
+#Range for defect diagram
+min_value = -40
+max_value = 0
+iterator = 2
+
+#Define the host properties 
+Host : Li_2-Ti-O_3
+Host_energy : -3326.97680 eV
+Host_supercell : -212926.4738576
+E_VBM : 6.32 eV
+
+#Selection of method to calculate chemical potentials
+chem_pot_method : volatile-rich-poor
+#Request for oxygen to be treated as a real gas when calculating chemical potential temperature dependence
+real_gas = 1
+
+#Method selection for carrier concentrations
+Electron_method : Boltzmann
+Hole_method : Boltzmann
+
+Valenceband : 147.2702
+Conductionband : 17.76023
+
+#Constituents listed as required for 'volatile-rich-poor' chemical potential method
+Constituents
+O 0 -20
+Li_2-O 1 -843.5319278 -201.0166555 -5.8158768 1
+Ti-O_2 1 -2482.17894 -1601.1944250 -9.218336 0
+
+#Fixed temperature (if temperature not the variable)
+Temperature = 1000
+
+#Define electronic properties.
+Bandgap : 3.27 eV
+
+#Corrections
+Coulombic_correction : 2
+Screened_Madelung : 0.00034559
+
+#Dopants
+Dopant_table : 2
+H H -17.8701 2  0.01 2.3
+He He -78.498 1 0.01 1.5
+
+#Method to calculate defect concentrations
+Defect_conc_method : Boltzmann
+
+#Plotting preferences
+min_y_range : -5
+
