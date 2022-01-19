@@ -13,7 +13,7 @@ import platform
 
 #####################################################
 #                                                   #      
-#           Defect Analysis Package 1.0             #
+#           Defect Analysis Package 1.01            #
 #                                                   #
 #               by Samuel T. Murphy                 #
 #               & William D. Neilson                #
@@ -37,11 +37,11 @@ import platform
 #                                                   #
 #####################################################
 #                                                   #
-# Last updated :  12/01/22                          #
+# Last updated :  19/01/22                          #
 #                                                   #
 #####################################################
 
-version = '1.0'
+version = '1.01'
 
 #Function to print header
 def header():
@@ -53,7 +53,7 @@ def header():
     print( "| |____/ \___|_|/_/   \_\_| (_) .__/ \__, | |")
     print( "|                             |_|    |___/  |")
     print( "|                                           |")
-    print( "|       Defect Analysis Package : 1.0       |")
+    print( "|       Defect Analysis Package : 1.01      |")
     print( "|             mmmg.co.uk/defap              |")
     print( "+-------------------------------------------+")
     print( "|                                           |")
@@ -2417,8 +2417,19 @@ def stoich(concentrations, defects, host_array,number_of_defects,dopants, x_vari
     #Function that finds deviation in stoichiometry for volatile species
     #Volatile species must be the last element in the host.
     #Whether a defect contributes to hyper/hypo stoic is determined by input in .defects file. 
- 
+
+    #First, determine the metal and volatile elements' stoichiometry coefficients 
     stoic_sum=0
+    for i in np.arange(0,host_array[0], 1):
+
+        stoic = Decimal(host_array[2*i+2])
+     
+        if i==host_array[0]-1:
+            volatile_stoic= stoic
+        else:
+            stoic_sum +=stoic
+
+    #Now deterimine defect contributions.
     numerator=0
     denominator=0
     #loop over atoms in host
@@ -2436,13 +2447,14 @@ def stoich(concentrations, defects, host_array,number_of_defects,dopants, x_vari
                 contribution += (10**float(concentrations[j+2]))*(-1*element_change)
                 
         contribution = Decimal(contribution)     
-        contribution +=stoic
+
         if i == host_array[0]-1:
+            contribution +=stoic
             numerator += contribution
                  
         else:
+            contribution = (contribution/volatile_stoic) + (stoic/stoic_sum)
             denominator += contribution        
-            stoic_sum += stoic
                 
     #Two options for dopants:
             #Stoichiometry = 1 calculates stoichiometry with original cations, considers the cation/volatile species leaving the system in a substitution, but not the dopant added.
@@ -2463,10 +2475,11 @@ def stoich(concentrations, defects, host_array,number_of_defects,dopants, x_vari
                     if element_change != 0 :
                         contribution += (10**float(concentrations[j+2]))*(-1*element_change)
 
-                contribution = Decimal(contribution)  
+                contribution = Decimal(contribution)
+                contribution = (contribution/volatile_stoic) 
                 denominator += contribution
 
-    final_stoic= -1*((numerator/(denominator/stoic_sum))-stoic)
+    final_stoic= -1*((numerator/denominator)-volatile_stoic)
 
     if  x_variable ==1: #Plotting as a function of stoichiometery
 
@@ -2538,6 +2551,9 @@ def graphical_inputs(seedname):
 def graphical_output(number_of_defects,min_value,max_value,final_concentrations,seedname,loop,gnuplot_version,min_y_range,host_name,defects,electron_method,hole_method,dopants,host_array,entry_marker,conc_colour,electron_colour,hole_colour,scheme, dopant_conc, stoichiometry,x_variable,total_species,volatile_element,charged_sys):
 
     print("..> Plotting defect concentrations")
+
+    #Improve presentation of the host name
+    host_name = host_name.replace("-", "")
 
     #colour choice
    
@@ -2625,9 +2641,10 @@ def graphical_output(number_of_defects,min_value,max_value,final_concentrations,
         print("#GNUPLOT script for showing defect concentrations\n",file=f)
         print("set terminal postscript eps enhanced color font 'Helvetica,20'", file=f)
         print("set output \"",outputfile,"\"", sep="",file=f)
+        print("set encoding iso_8859_1",file=f)
 
         if x_variable ==1:
-            print("set xlabel 'Stoichiometry'", file=f)
+            print("set xlabel \"x in ",host_name,"_{+x}\"",sep="",file=f)
         else:     
             if(loop == 0):
                 print("set xlabel 'log_{10}P_{",volatile_element,"_{2}} /atm'",sep="", file=f)
@@ -2688,8 +2705,9 @@ def graphical_output(number_of_defects,min_value,max_value,final_concentrations,
                         print("\"./",resultfile,"\" using 1:",i+5," with lines lt ",line_type," lw 2 lc rgb \"", colour,"\" ti \"",defect," \",\\",sep="",file=f)
                 i +=1
             if  stoichiometry != 0 and x_variable ==0:
-                print("\"./",resultfile,"\" using 1:",i+5," with lines lt 2 lw 2 lc rgb \"", colourx,"\" ti \"Stoichiometry\",\\",sep="",file=f)
-
+                pm = r"\261"
+                print("\"./",resultfile,"\" using 1:",i+5," with lines lt 2 lw 2 lc rgb \"", colourx,"\" ti \"x in ",host_name,"_{",pm,"x}\",\\",sep="",file=f)
+        
         #Plot sum of concentrations, based on group.
         elif entry_marker ==1:
             i=0   
@@ -2704,7 +2722,8 @@ def graphical_output(number_of_defects,min_value,max_value,final_concentrations,
                 i +=1
        
             if  stoichiometry != 0 and x_variable ==0:
-                print("\"./",resultfile,"\" using 1:",i+5," with lines lt 2 lw 2 lc rgb \"", colourx,"\" ti \"Stoichiometry\",\\",sep="",file=f)
+                pm = r"\261"
+                print("\"./",resultfile,"\" using 1:",i+5," with lines lt 2 lw 2 lc rgb \"", colourx,"\" ti \"x in ",host_name,"_{",pm,"x}\",\\",sep="",file=f)
 
         #Plot Fermi energy
         if charged_sys == 1: 
