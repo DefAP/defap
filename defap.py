@@ -13,7 +13,7 @@ import platform
 
 #####################################################
 #                                                   #      
-#           Defect Analysis Package 1.01            #
+#           Defect Analysis Package 1.10            #
 #                                                   #
 #               by Samuel T. Murphy                 #
 #               & William D. Neilson                #
@@ -37,11 +37,11 @@ import platform
 #                                                   #
 #####################################################
 #                                                   #
-# Last updated :  19/01/22                          #
+# Last updated :  05/04/22                          #
 #                                                   #
 #####################################################
 
-version = '1.01'
+version = '1.10'
 
 #Function to print header
 def header():
@@ -53,7 +53,7 @@ def header():
     print( "| |____/ \___|_|/_/   \_\_| (_) .__/ \__, | |")
     print( "|                             |_|    |___/  |")
     print( "|                                           |")
-    print( "|       Defect Analysis Package : 1.01      |")
+    print( "|       Defect Analysis Package : 1.10      |")
     print( "|             mmmg.co.uk/defap              |")
     print( "+-------------------------------------------+")
     print( "|                                           |")
@@ -94,6 +94,7 @@ def inputs(seedname):
     iterator = 1                #Iterator between minimum and maximum
     gnuplot_version = 0         #Version of gnuplot 0 = v4, 1 = v5
     min_y_range = -20           #Minimum on the y axis for Brouwer plots
+    max_y_range = 0             #Maximum on the y axis for Brouwer plots
     host_name =''               #Host name
     cond_band_min=0             #Conduction band minimum
     cond_band_max=2             #Conduction band maximum
@@ -102,7 +103,7 @@ def inputs(seedname):
     fu_uc=1                     #Number of functional units per unit cell. 
     electron_mass_eff=0         #DOS effective mass for electron
     hole_mass_eff=0             #DOS effective mass for hole
-    unit_vol=10                 #Volume of unit cell (A^3) Used in DOS effective masses
+    unit_vol=0                  #Volume of unit cell (A^3) Used in DOS effective masses and for y axis unit conversion
     lines = 0                   # Not in use
     y_form_min=0                # Not in use
     y_form_max=10               # Not in use
@@ -110,7 +111,8 @@ def inputs(seedname):
     entropy_units=1             #The number of functional units the entropy values that are entered in filename.entropy represen   
     scheme =0                   #Selection of colour scheme for plots produced by DefAP: 0: DefAP colour scheme (default).1: User customised scheme. Requires the input file, filename.plot
     stoichiometry=0             #Calculate and plot stoichiometry 1= on, 2= special option that considers dopants and calulates an O/M ratio. 
-    x_variable =0               #Selection of x-axis in final defect concentration plots: 0: Plot as function of the property defined withl oop (default). 1: Plot as a function of stoichiometry.
+    x_variable =0               #Selection of x-axis in final defect concentration plots: 0: Plot as function of the property defined with loop (default). 1: Plot as a function of stoichiometry.
+    y_variable =0                   #Selection of y-axis units in final defect concentration plots: 0: Per functional unit (default). 1: per cm^-3.
     real_gas = 0                #Calculate volatile chemical potetial with real gas parameters (1) 
     function_tol= 1e-10         #Sequential Least Squares Programming: Precision goal for the value of function in the stopping criterion.
     maxiter_dop= 100            #Maximum number of iterations to optimise dopant chemical potential(s) (SLSQP)
@@ -153,6 +155,7 @@ def inputs(seedname):
                     #loop = 1 : loop over temperature
                     #loop = 2 : loop over dopant concentration
                     #loop = 3 : loop over artificial charge concentration
+                    #loop = 4 : loop over dopant partial pressure
                             
                 #Properties for loop
                 if (name == "min_value"):
@@ -384,28 +387,39 @@ def inputs(seedname):
                         with open(filename) as file4:
                             for linenumber4, line4 in enumerate(file4):
                                 fields4 = line4.strip().split()
-
-                                
+                         
                                 if linenumber+i == linenumber4:
-                                    dopant_name = fields4[0]
-                                    reference_state = fields4[1]
-                                    reference_energy =float(fields4[2])
-                                    fit_chempot =float(fields4[3])
-                                    if fit_chempot != 0:
-                                        dopant_fitting+=1    
-                                    target_conc = float(fields4[4])
-                                    dopant_range = float(fields4[5])
-
-                                    dopants.append(dopant_name)
-                                    dopants.append(reference_energy)
-                                    dopants.append(fit_chempot)
-                                    dopants.append(target_conc)
-                                                       
+                                    dopant_name = fields4[0]                                   
                                     #Break down details of the reference state
+                                    reference_state = fields4[1]
                                     temp_array = break_formula(reference_state,1)
-                                        
-                                    dopants.append(temp_array)
-                                    dopants.append(dopant_range)
+                                    dopants.append(dopant_name)
+                                    
+                                    reference_energy =float(fields4[2])
+                                    dopants.append(reference_energy)
+                                 
+                                    fit_chempot =int(fields4[3])
+                                    dopants.append(fit_chempot)
+
+                                    if fit_chempot == 0:
+                                        dopants.append(0)
+                                        dopants.append(temp_array)
+                                        dopants.append(0)
+
+                                    if fit_chempot == 1 or fit_chempot == 2:
+                                        dopant_fitting+=1    
+                                        target_conc = float(fields4[4])
+                                        dopant_range = float(fields4[5])
+                                        dopants.append(target_conc)
+                                        dopants.append(temp_array)
+                                        dopants.append(dopant_range)
+
+                                    if fit_chempot == 3 or fit_chempot == 4:   
+                                        dop_partial_pressure = float(fields4[4])
+                                        dopants.append(0)
+                                        dopants.append(temp_array)
+                                        dopants.append(dop_partial_pressure)                 
+                                                                                                         
                                     dopref_name_list.append(reference_state)
 
                 #Dopant optimise details
@@ -482,16 +496,22 @@ def inputs(seedname):
                 if name == "entropy_units":
                     entropy_units = int(fields[2])
                 
-                #Plotting preferences x_variable
+                #Plotting preferences 
                 if (name == "x_variable"):
                     x_variable = int(fields[2])
+                if (name == "y_axis"):
+                    y_variable = int(fields[2])
+                    if y_variable ==1:
+                        max_y_range = 20
                 if (name == "Gnuplot_version"):
                     gnuplot_version = fields[2]
                 if (name == "min_y_range"):
                     min_y_range = fields[2]
+                if (name == "max_y_range"):
+                    max_y_range = fields[2]
                 if name == "Scheme":
                     scheme = int(fields[2])
-  
+
     #Some error messages
 
     if len(tasks) ==0:
@@ -525,7 +545,15 @@ def inputs(seedname):
     if min_value >= max_value:
         print("<!> Error: Incompatible min_value and max_value")
         exit()
-              
+
+    if (unit_vol==0) and (y_variable ==1):
+        print("<!> Error: Unit cell volume must be defined for the y axis to be in units of cm^-3")
+        exit()
+
+    if (unit_vol==0) and ((hole_method == 4)or(electron_method == 4)):
+        print("<!> Error: Unit cell volume must be defined for the carrier concentration method selected")
+        exit()
+                
     #Output file construction
 
     now = datetime.now()
@@ -664,25 +692,47 @@ def inputs(seedname):
                 print(">>> Dopants\n",file=f)
                 print("   Number of dopants :", int(dopants[0]),file=f)
                 if (dopants[0] != 0 ):
-                    print("   +----------------+------------------+-----------------------------+----------------+--------------------------+-------------------------------+",file=f)
-                    print("   | Dopant element | Dopant reference | DFT energy of reference (eV)| Fitting option | Target concentration pfu | Chemical potential range (eV) |",file=f)
-                    print("   +----------------+------------------+-----------------------------+----------------+--------------------------+-------------------------------+",file=f)
                     for i in np.arange(0, dopants[0], 1):
-                        i = int(i)          
-                        dopant_name = dopants[6*i+1]
-                        reference_state =dopref_name_list[i]
-                        reference_energy =float(dopants[6*i+2])
-                        fit_chempot =int(dopants[6*i+3])
-                        target_conc = float(dopants[6*i+4])
-                        dopant_range = float(dopants[6*i+6])
-                        print("   | %14s | %16s | %27f | %14i | %24s | %29f |" % (dopant_name, reference_state,reference_energy,fit_chempot,"{:.10f}".format(target_conc),dopant_range),file=f)
-                    print("   +----------------+------------------+-----------------------------+----------------+--------------------------+-------------------------------+\n",file=f)
+                         i = int(i)     
+                         print("\n   Dopant",i+1,":",file=f)
+                         fit_chempot =int(dopants[6*i+3])
+                         if fit_chempot ==0:
+                             print("   +----------------+------------------+-----------------------------+----------------+",file=f)
+                             print("   | Dopant element | Dopant reference | DFT energy of reference (eV)| Fitting option |",file=f)
+                             print("   +----------------+------------------+-----------------------------+----------------+",file=f)         
+                             dopant_name = dopants[6*i+1]
+                             reference_state =dopref_name_list[i]
+                             reference_energy =float(dopants[6*i+2])
+                             fit_chempot =int(dopants[6*i+3])
+                             print("   | %14s | %16s | %27f | %14i |" % (dopant_name, reference_state,reference_energy,fit_chempot),file=f)
+                             print("   +----------------+------------------+-----------------------------+----------------+\n",file=f)
+                         elif fit_chempot == 1 or fit_chempot == 2:                            
+                             print("   +----------------+------------------+-----------------------------+----------------+--------------------------+-------------------------------+",file=f)
+                             print("   | Dopant element | Dopant reference | DFT energy of reference (eV)| Fitting option | Target concentration pfu | Chemical potential range (eV) |",file=f)
+                             print("   +----------------+------------------+-----------------------------+----------------+--------------------------+-------------------------------+",file=f)         
+                             dopant_name = dopants[6*i+1]
+                             reference_state =dopref_name_list[i]
+                             reference_energy =float(dopants[6*i+2])
+                             target_conc = float(dopants[6*i+4])
+                             dopant_range = float(dopants[6*i+6])
+                             print("   | %14s | %16s | %27f | %14i | %24s | %29f |" % (dopant_name, reference_state,reference_energy,fit_chempot,"{:.10f}".format(target_conc),dopant_range),file=f)
+                             print("   +----------------+------------------+-----------------------------+----------------+--------------------------+-------------------------------+\n",file=f)
+                         elif fit_chempot == 3 or fit_chempot == 4:                    
+                             print("   +----------------+------------------+-----------------------------+----------------+------------------+",file=f)
+                             print("   | Dopant element | Dopant reference | DFT energy of reference (eV)| Fitting option | Partial pressure |",file=f)
+                             print("   +----------------+------------------+-----------------------------+----------------+------------------+",file=f)         
+                             dopant_name = dopants[6*i+1]
+                             reference_state =dopref_name_list[i]
+                             fit_chempot =int(dopants[6*i+3])
+                             partial_pressure = float(dopants[6*i+6])
+                             print("   | %14s | %16s | %27f | %14i | %16i |" % (dopant_name, reference_state,reference_energy,fit_chempot,partial_pressure),file=f)
+                             print("   +----------------+------------------+-----------------------------+----------------+------------------+\n",file=f)             
                
                 if loop != 3:
                     print("   Artificial dopant concentration:", art_dop_conc, file=f)
                     print("   Artificial dopant charge:", art_dop_charge, file=f)
                
-                if dopant_fitting != 0:
+                if dopant_fitting == 1 or dopant_fitting == 2:
                     print("\n   Fitting chemical potential of",dopant_fitting,"dopants", file=f)
                     if dopant_fitting ==1:
                         print("   Using Linear Bisection", file=f)
@@ -692,7 +742,7 @@ def inputs(seedname):
                         print("   SLSQP precision goal : ",function_tol, file=f)
                         print("   SLSQP maximum iterations : ",maxiter_dop, file=f)
                 else:
-                    print("\n   No fitting of dopant chemical potentials selected:", file=f)
+                    print("\n   No fitting of dopant chemical potentials selected", file=f)
 
                 #Entropy
                 print("\n>>> Entropy\n", file=f)
@@ -763,6 +813,30 @@ def inputs(seedname):
                         print("   Artificial dopant concentration range :",min_value,"-",max_value, "pfu\n",file=f)
                         print("   Artificial dopant charge:", art_dop_charge, file=f)
 
+                    if(loop == 4):
+                        print("   Looping over dopant partial pressure\n",file=f)
+                        
+                        print("   Temperature :",temperature , "K",file=f)
+                        print( "   Dopant partial pressure range :",min_value, "-",max_value, "\n",file=f)
+
+                    print("\n>>> Plotting preferences", file=f)
+            
+                    if y_variable ==0:
+                        print('\n   Units of y axis set at \"concentration per functional unit\"', file=f)
+                    if y_variable ==1:
+                        print('\n   Units of y axis set at \"concentration per cm^-3\"', file=f)
+                        print('   Conversion parameters:', file=f)
+                        print('   Unit cell volume:',unit_vol,"Angstroms^3", file=f)
+                        print('   Number of functional units in unit cell:',fu_uc, file=f)
+                    print('   Minimum of y-axis set at',min_y_range, file=f)
+                    print('   Maximum of y-axis set at',max_y_range, file=f)
+                    if x_variable == 1:
+                        print('   Plotting as a function of stoichiometery; default range -0.1 to +0.1', file=f)
+                    if scheme == 0:
+                        print('   Default coulour scheme will be used', file=f)
+                    if scheme == 1:
+                        print('   User defeined coulour scheme will be used from file.plot', file=f)
+           
                 if ('stability' in tasks):
                      print("\n>>> Instructions for: Task = stability", file=f)
                      print("\n   Checking the stability of",int(number_of_checks),"compounds",file=f)
@@ -780,7 +854,7 @@ def inputs(seedname):
             
     print("..> Input file read successfully")
     
-    return (host_array,dopants,tasks,constituents,constituents_name_list,temperature,def_statistics,tab_correction,host_energy,chem_pot_method,host_supercell,use_coul_correction,length,dielectric,v_M,E_VBM,bandgap,condband,valband,electron_method,hole_method,fixed_e_conc,fixed_p_conc,art_dop_conc,art_dop_charge,loop,min_value,max_value,iterator,gnuplot_version,min_y_range,host_name,val_band_min,val_band_max,cond_band_min,cond_band_max,y_form_min,y_form_max,lines, entropy_marker, entropy_units,fu_uc,electron_mass_eff,hole_mass_eff,unit_vol,charge_convergence, potential_convergence,stability, scheme,stoichiometry,x_variable,real_gas,function_tol,maxiter_dop)
+    return (host_array,dopants,tasks,constituents,constituents_name_list,temperature,def_statistics,tab_correction,host_energy,chem_pot_method,host_supercell,use_coul_correction,length,dielectric,v_M,E_VBM,bandgap,condband,valband,electron_method,hole_method,fixed_e_conc,fixed_p_conc,art_dop_conc,art_dop_charge,loop,min_value,max_value,iterator,gnuplot_version,min_y_range,max_y_range,host_name,val_band_min,val_band_max,cond_band_min,cond_band_max,y_form_min,y_form_max,lines, entropy_marker, entropy_units,fu_uc,electron_mass_eff,hole_mass_eff,unit_vol,charge_convergence, potential_convergence,stability, scheme,stoichiometry,x_variable,real_gas,function_tol,maxiter_dop, y_variable)
 
 #Subroutine for breaking down chemical formula
 def break_formula(formula, index):
@@ -1616,7 +1690,11 @@ def stability_check(stability,chemical_potentials,indicator,b):
    
     return stability_printout,indicator
     
-def dopant_chemical(dopants,chemical_potentials):
+def dopant_chemical(dopants,chemical_potentials,temperature,real_gas):
+
+    #Some constants
+    std_pressue = 0.2
+    boltzmann = 0.000086173324
 
     number_dopants = dopants[0]
     opt_chem_pot = 0 
@@ -1628,46 +1706,81 @@ def dopant_chemical(dopants,chemical_potentials):
         
         target = dopants[int((6*i)+1)]
         reference_state_energy = float(dopants[int((6*i)+2)])
-        fit_potential = float(dopants[int((6*i)+3)])
-        target_potential = float(dopants[int((6*i)+4)])
+        potential_method = int(dopants[int((6*i)+3)])
         reference_breakdown = dopants[int((6*i)+5)]
         num_element_ref = reference_breakdown[0]
 
-        #print(target,reference_state_energy ,fit_potential ,target_potential, num_element_ref)
-
         #identify if optimise of dopant chemical potential is requested.
-        if fit_potential != 0:
+        if potential_method == 1 or potential_method ==  2:
             opt_chem_pot =1
-        
-        #Loop over elements in reference state
-        
-        for j in np.arange(0,num_element_ref, 1):
 
-            element =reference_breakdown[int((2*j)+1)]
+        if potential_method == 3 or potential_method == 4:   
+            partial_pressure = float(dopants[int((6*i)+6)])
             
-            if (element == target):
+        if potential_method != 3 or potential_method != 4:
+            #Loop over elements in reference state
+            for j in np.arange(0,num_element_ref, 1):
 
-                denominator = float(reference_breakdown[int((2*j)+2)])
+                element =reference_breakdown[int((2*j)+1)]
                 
-            else:
+                if (element == target):
 
-                stoich_number = float(reference_breakdown[int((2*j)+2)])
-                                  
-                #Find the chemical potential for element in chemical_potentials
-                elements_in_list = (len(chemical_potentials))/2
-                for w in np.arange(0,elements_in_list, 1):
-                    ref_element = chemical_potentials[int(2*w)];
+                    denominator = float(reference_breakdown[int((2*j)+2)])
+                    
+                else:
 
-                    if (ref_element == element):
+                    stoich_number = float(reference_breakdown[int((2*j)+2)])
+                                      
+                    #Find the chemical potential for element in chemical_potentials
+                    elements_in_list = (len(chemical_potentials))/2
+                    for w in np.arange(0,elements_in_list, 1):
+                        ref_element = chemical_potentials[int(2*w)];
 
-                        contribution = stoich_number*float(chemical_potentials[int(2*w+1)])
-                        running_pot_total += contribution
-              
-        final_chemical = (reference_state_energy - running_pot_total)/denominator
+                        if (ref_element == element):
+
+                            contribution = stoich_number*float(chemical_potentials[int(2*w+1)])
+                            running_pot_total += contribution
+                  
+            final_chemical = (reference_state_energy - running_pot_total)/denominator
+
+        if potential_method == 3 or potential_method == 4:
+            #Loop over elements in reference state
+            for j in np.arange(0,num_element_ref, 1):
+
+                element =reference_breakdown[int((2*j)+1)]
+                
+                if (element == target):
+
+                    denominator = float(reference_breakdown[int((2*j)+2)])
+                    
+                else:
+
+                    stoich_number = float(reference_breakdown[int((2*j)+2)])
+                                      
+                    #Find the chemical potential for element in chemical_potentials
+                    elements_in_list = (len(chemical_potentials))/2
+                    for w in np.arange(0,elements_in_list, 1):
+                        ref_element = chemical_potentials[int(2*w)];
+
+                        if (ref_element == element):
+
+                            contribution = stoich_number*float(chemical_potentials[int(2*w+1)])
+                            running_pot_total += contribution
+                  
+            nu_volatile_std  = (reference_state_energy - running_pot_total)/denominator
+
+            temp_cont = temperature_cont(target,temperature,real_gas)
+            
+            #Change partial pressure from a log to atm
+            partial_pressure_atm = 1/(10**-partial_pressure )
+            pres_cont = (1/2)*boltzmann*temperature*math.log(partial_pressure_atm/std_pressue)
+            
+            #Calcate volatile element chemical potential under desired conditions
+            final_chemical = nu_volatile_std + temp_cont + pres_cont
 
         chemical_potentials.append(target)
         chemical_potentials.append(final_chemical)
- 
+   
     return chemical_potentials, opt_chem_pot
 
 def calc_opt_chem_pot(b,loop,defects,dopants,chemical_potentials,number_of_defects,host_supercell,tab_correction,E_VBM,total_species,use_coul_correction,length,dielectric,v_M,bandgap,temperature,def_statistics,nu_e,condband,valband,electron_method,hole_method,fixed_e_conc,fixed_p_conc,art_dop_conc,art_dop_charge,charge_convergence,val_band_min,val_band_max,cond_band_min,cond_band_max,seedname,entropies, fu_uc,electron_mass_eff,hole_mass_eff,unit_vol,charged_sys, log_diff_conv,function_tol,maxiter_dop,environment,prog_meter,prog_bar,num_iter):         
@@ -2548,10 +2661,10 @@ def graphical_inputs(seedname):
             
     return conc_colour,form_colour,electron_colour,hole_colour
 
-def graphical_output(number_of_defects,min_value,max_value,final_concentrations,seedname,loop,gnuplot_version,min_y_range,host_name,defects,electron_method,hole_method,dopants,host_array,entry_marker,conc_colour,electron_colour,hole_colour,scheme, dopant_conc, stoichiometry,x_variable,total_species,volatile_element,charged_sys):
-
+def graphical_output(number_of_defects,min_value,max_value,final_concentrations,seedname,loop,gnuplot_version,min_y_range,host_name,defects,electron_method,hole_method,dopants,host_array,entry_marker,conc_colour,electron_colour,hole_colour,scheme, dopant_xvar, stoichiometry,x_variable,total_species,volatile_element,charged_sys, y_variable,max_y_range):
+    
     print("..> Plotting defect concentrations")
-
+ 
     #Improve presentation of the host name
     host_name = host_name.replace("-", "")
 
@@ -2642,25 +2755,32 @@ def graphical_output(number_of_defects,min_value,max_value,final_concentrations,
         print("set terminal postscript eps enhanced color font 'Helvetica,20'", file=f)
         print("set output \"",outputfile,"\"", sep="",file=f)
         print("set encoding iso_8859_1",file=f)
-
+        
         if x_variable ==1:
-            print("set xlabel \"x in ",host_name,"_{+x}\"",sep="",file=f)
+            if host_array[-1] == 1:
+                print("set xlabel \"x in ",host_name,"_{1+x}\"",sep="",file=f)
+            else:
+                print("set xlabel \"x in ",host_name,"_{+x}\"",sep="",file=f)
         else:     
             if(loop == 0):
                 print("set xlabel 'log_{10}P_{",volatile_element,"_{2}} /atm'",sep="", file=f)
             elif(loop == 1):
                 print("set xlabel 'Temperature /K'", file=f)
             elif(loop == 2):
-                print("set xlabel 'log_{10}[",dopant_conc,"] (per ",host_name,")'",sep="",file=f)
+                print("set xlabel 'log_{10}[",dopant_xvar,"] (per ",host_name,")'",sep="",file=f)
             elif(loop == 3):
                 print("set xlabel 'log_{10}[artificial dopant conc] (per ",host_name,")'",sep="", file=f)
-
-        print("set ylabel 'log_{10}[D] (per ",host_name,")'\n",sep="", file=f)
+            elif(loop == 4):
+                print("set xlabel 'log_{10}P_{",dopant_xvar,"_{2}} /atm'",sep="",file=f)
+        if y_variable ==1:
+            print("set ylabel 'log_{10}[D] (per cm^{-3})'\n",sep="", file=f)            
+        else:
+            print("set ylabel 'log_{10}[D] (per ",host_name,")'\n",sep="", file=f)               
         if x_variable ==1:
             print("set xrange [-0.1:0.1]",sep="", file=f)
         else:
             print("set xrange [",min_value,":",max_value,"]",sep="", file=f)
-        print("set yrange [",min_y_range,":",0,"]\n",sep="", file=f)
+        print("set yrange [",min_y_range,":",max_y_range,"]\n",sep="", file=f)
         #Dashtype
         print("set linetype 2 dt \"_\"", file=f)
         print("set linetype 3 dt 2", file=f)
@@ -2706,7 +2826,10 @@ def graphical_output(number_of_defects,min_value,max_value,final_concentrations,
                 i +=1
             if  stoichiometry != 0 and x_variable ==0:
                 pm = r"\261"
-                print("\"./",resultfile,"\" using 1:",i+5," with lines lt 2 lw 2 lc rgb \"", colourx,"\" ti \"x in ",host_name,"_{",pm,"x}\",\\",sep="",file=f)
+                if host_array[-1] == 1:
+                    print("\"./",resultfile,"\" using 1:",i+5," with lines lt 2 lw 2 lc rgb \"", colourx,"\" ti \"x in ",host_name,"_{1",pm,"x}\",\\",sep="",file=f)
+                else:
+                    print("\"./",resultfile,"\" using 1:",i+5," with lines lt 2 lw 2 lc rgb \"", colourx,"\" ti \"x in ",host_name,"_{",pm,"x}\",\\",sep="",file=f)
         
         #Plot sum of concentrations, based on group.
         elif entry_marker ==1:
@@ -2723,7 +2846,10 @@ def graphical_output(number_of_defects,min_value,max_value,final_concentrations,
        
             if  stoichiometry != 0 and x_variable ==0:
                 pm = r"\261"
-                print("\"./",resultfile,"\" using 1:",i+5," with lines lt 2 lw 2 lc rgb \"", colourx,"\" ti \"x in ",host_name,"_{",pm,"x}\",\\",sep="",file=f)
+                if host_array[-1] == 1:
+                    print("\"./",resultfile,"\" using 1:",i+5," with lines lt 2 lw 2 lc rgb \"", colourx,"\" ti \"x in ",host_name,"_{1",pm,"x}\",\\",sep="",file=f)
+                else:
+                    print("\"./",resultfile,"\" using 1:",i+5," with lines lt 2 lw 2 lc rgb \"", colourx,"\" ti \"x in ",host_name,"_{",pm,"x}\",\\",sep="",file=f)
 
         #Plot Fermi energy
         if charged_sys == 1: 
@@ -2735,9 +2861,11 @@ def graphical_output(number_of_defects,min_value,max_value,final_concentrations,
             elif(loop == 1):
                 print("set xlabel 'Temperature /K'", file=f)
             elif(loop == 2):
-                print("set xlabel 'log_{10}[",dopant_conc,"] (per ",host_name,")'",sep="",file=f)
+                print("set xlabel 'log_{10}[",dopant_xvar,"] (per ",host_name,")'",sep="",file=f)
             elif(loop == 3):
                 print("set xlabel 'log_{10}[artificial_dopant_conc] (per ",host_name,")'",sep="", file=f)
+            elif(loop == 4):
+                print("set xlabel 'log_{10}P_{",dopant_xvar,"_{2}} /atm'",sep="",file=f)
             print("set autoscale y",sep="", file=f)
             print("set key off",sep="", file=f)
             print("set ylabel 'Fermi level (eV)'\n",sep="", file=f)
@@ -3007,6 +3135,25 @@ def formation_graphical_output(seedname, bandgap, defects, y_form_min, y_form_ma
                     j+=1                                            
                 i+=1
             group_position.append(group_position_i)
+
+def y_convert(final_concentrations,fu_uc, uc_volume,stoichiometry):
+
+    #Nummber of Angstrom^3 in cm^3
+    A3_2_cm3 = 1E24
+
+    conversion = fu_uc * (1/uc_volume) * A3_2_cm3
+
+    inc = 0  #Do not want to convert the final column if stoichiometry has been calculated
+    if stoichiometry != 0:
+        inc = 1 
+        
+    for i in np.arange(0,(len(final_concentrations)),1):      
+        for j in np.arange(2,(len(final_concentrations[0])-inc),1):
+            concentration = 10**final_concentrations[i][j]
+            concentration = concentration *conversion          
+            final_concentrations[i][j]= math.log(concentration)/math.log(10)
+
+    return final_concentrations
      
 def invert_matrix(input_mat, marker):       #Function for inverting a matrix
   
@@ -3624,12 +3771,12 @@ fermi = []
 stoichiometry_list = []
 #Defaults
 indicator =0 
-dopant_conc='None'
+dopant_xvar='None'
 volatile_element = ''
 concentration_check =0
 
 #Read in data
-host_array,dopants,tasks,constituents,constituents_name_list,temperature,def_statistics,tab_correction,host_energy,chem_pot_method,host_supercell,use_coul_correction,length,dielectric,v_M,E_VBM,bandgap,condband,valband,electron_method,hole_method,fixed_e_conc,fixed_p_conc,art_dop_conc,art_dop_charge,loop,min_value,max_value,iterator,gnuplot_version,min_y_range,host_name,val_band_min,val_band_max,cond_band_min,cond_band_max,y_form_min,y_form_max,lines, entropy_marker, entropy_units,fu_uc,electron_mass_eff,hole_mass_eff,unit_vol,charge_convergence,potential_convergence,stability,scheme,stoichiometry,x_variable,real_gas,function_tol,maxiter_dop  =inputs(seedname)
+host_array,dopants,tasks,constituents,constituents_name_list,temperature,def_statistics,tab_correction,host_energy,chem_pot_method,host_supercell,use_coul_correction,length,dielectric,v_M,E_VBM,bandgap,condband,valband,electron_method,hole_method,fixed_e_conc,fixed_p_conc,art_dop_conc,art_dop_charge,loop,min_value,max_value,iterator,gnuplot_version,min_y_range,max_y_range,host_name,val_band_min,val_band_max,cond_band_min,cond_band_max,y_form_min,y_form_max,lines, entropy_marker, entropy_units,fu_uc,electron_mass_eff,hole_mass_eff,unit_vol,charge_convergence,potential_convergence,stability,scheme,stoichiometry,x_variable,real_gas,function_tol,maxiter_dop,y_variable =inputs(seedname)
 
 #Read in data from seedname.defects
 for i in tasks:
@@ -3690,7 +3837,7 @@ if ('energy' in tasks):
     opt_chem_pot=0
     #Calculate the dopant chemical potentials
     if (dopants[0] > 0):
-        chemical_potentials, opt_chem_pot = dopant_chemical(dopants,chemical_potentials)
+        chemical_potentials, opt_chem_pot = dopant_chemical(dopants,chemical_potentials,temperature,real_gas)
    
     nu_e = 1
     #Optimise the dopant checmial potentials, if requsted
@@ -3780,7 +3927,7 @@ if ('brouwer' in tasks):
                 fit_potential = float(dopants[int((6*i)+3)])
                 if fit_potential == 2: 
                     dopants[int((6*i)+4)]= (10**b)
-                    dopant_conc=dopants[int((6*i)+1)]
+                    dopant_xvar=dopants[int((6*i)+1)]
                     fit_counter+=1
             if fit_counter != 1:
                 print("<!> No dopant (or too many) selected as independent variable. Review input file")
@@ -3790,6 +3937,20 @@ if ('brouwer' in tasks):
         if (loop == 3):     #Artificial charge
             art_dop_conc= (10**b)
             environment = "artificial dopant concentration"
+
+        if (loop == 4):     #Dopant partial pressure
+            number_dopants = int(dopants[0])
+            fit_counter = 0 
+            for i in np.arange(0,number_dopants, 1):          
+                fit_potential = float(dopants[int((6*i)+3)])
+                if fit_potential == 4:
+                    dopants[int((6*i)+6)]= b
+                    dopant_xvar=dopants[int((6*i)+1)]
+                    fit_counter+=1
+            if fit_counter != 1:
+                print("<!> No dopant (or too many) selected as independent variable. Review input file")
+                exit()
+            environment = "dopant partial pressure"
              
         if ( x_variable == 1):     #Stoichiometry
             stoichiometry = 1          
@@ -3812,10 +3973,10 @@ if ('brouwer' in tasks):
             pp= constituents[2]
             
         opt_chem_pot=0
-        #Calculate the dopant checmial potentials
+        #Calculate the dopant checmical potentials
         if (dopants[0] > 0):
             
-            chemical_potentials, opt_chem_pot = dopant_chemical(dopants,chemical_potentials)
+            chemical_potentials, opt_chem_pot = dopant_chemical(dopants,chemical_potentials,temperature,real_gas)
           
         nu_e = 1
         #Optimise the dopant chemical potentials, if requsted
@@ -3937,19 +4098,26 @@ if ('brouwer' in tasks):
 
         (final_grouped_concs,group_list) = group(final_concentrations,number_of_defects,defects,num_iter, stoichiometry)
 
+        #Convert concentrations to cm^-3, if requested
+        if y_variable == 1:
+            final_grouped_concs = y_convert(final_grouped_concs,fu_uc, unit_vol,stoichiometry)
+
         #Print the seedname.res file
         print_results(final_grouped_concs,seedname)
        
         #Generate Brouwer diagram
-        graphical_output(number_of_defects,min_value,max_value,final_concentrations,seedname,loop,gnuplot_version,min_y_range,host_name,group_list,electron_method,hole_method,dopants,host_array,1,conc_colour,electron_colour,hole_colour,scheme, dopant_conc,stoichiometry,x_variable,total_species,volatile_element,charged_sys )
+        graphical_output(number_of_defects,min_value,max_value,final_concentrations,seedname,loop,gnuplot_version,min_y_range,host_name,group_list,electron_method,hole_method,dopants,host_array,1,conc_colour,electron_colour,hole_colour,scheme, dopant_xvar,stoichiometry,x_variable,total_species,volatile_element,charged_sys, y_variable,max_y_range )
         
     else:
+        #Convert concentrations to cm^-3, if requested
+        if y_variable == 1:
+            final_concentrations = y_convert(final_concentrations,fu_uc, unit_vol,stoichiometry)
 
         #Print the seedname.res file
         print_results(final_concentrations,seedname)
 
         #Generate Brouwer diagram
-        graphical_output(number_of_defects,min_value,max_value,final_concentrations,seedname,loop,gnuplot_version,min_y_range,host_name,defects,electron_method,hole_method,dopants,host_array,0,conc_colour,electron_colour,hole_colour,scheme, dopant_conc, stoichiometry,x_variable,total_species,volatile_element,charged_sys )
+        graphical_output(number_of_defects,min_value,max_value,final_concentrations,seedname,loop,gnuplot_version,min_y_range,host_name,defects,electron_method,hole_method,dopants,host_array,0,conc_colour,electron_colour,hole_colour,scheme, dopant_xvar, stoichiometry,x_variable,total_species,volatile_element,charged_sys, y_variable,max_y_range )
 
 #print stability readout, if requested
 if ('stability' in tasks):
