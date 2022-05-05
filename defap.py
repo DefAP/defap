@@ -28,16 +28,17 @@ import platform
 # interest                                          #
 #                                                   #
 # Please cite:                                      #
-# S. T. Murphy and N. D. M. Hine, "Point defects    #
-# and non-stoichiometry in Li2TiO3" Chemistry of    #
-# Materials 26 (2014) 1629-1638.                    # 
+# William D.Neilson and Samuel T.Murphy,            #
+# DefAP: A Python code for the analysis of point    # 
+# defects in crystalline solids, Computational      #
+# Materials Science 210 (2022) 111434.              # 
 #                                                   #
 # If you encounter any problems with this script    #
 # please contact: w.neilson@lancaster.ac.uk         #
 #                                                   #
 #####################################################
 #                                                   #
-# Last updated :  05/04/22                          #
+# Last updated :  05/05/22                          #
 #                                                   #
 #####################################################
 
@@ -3624,18 +3625,16 @@ def bibliography(tasks,chem_pot_method,real_gas,entropy_marker):
     with open('DefAP.bib', 'w') as f:
 
         print("%DefAP Publication",file=f)
-        print("@article{Murphy2014,",file=f)
-        print("annote = {doi: 10.1021/cm4038473},",file=f)
-        print("author = {Murphy, Samuel T and Hine, Nicholas D M},",file=f)
-        print("doi = {10.1021/cm4038473},",file=f)
-        print("issn = {0897-4756},",file=f)
-        print("journal = {Chem. Mater.},",file=f)
+        print("@article{DefAP2022,",file=f)
+        print("author = {Neilson, William D and Murphy, Samuel T },",file=f)
+        print("doi = {https://doi.org/10.1016/j.commatsci.2022.111434},",file=f)
+        print("issn = {0927-0256},",file=f)
+        print("journal = {Comput. Mater. Sci.},",file=f)
         print("month = {feb},",file=f)
-        print("pages = {1629--1638},",file=f)
-        print("publisher = {American Chemical Society},",file=f)
-        print("title = {{Point Defects and Non-stoichiometry in Li$_2$TiO$_3$}},",file=f)
-        print("volume = {26},",file=f)
-        print("year = {2014}",file=f)
+        print("pages = {111434},",file=f)
+        print("title = {DefAP: A Python code for the analysis of point defects in crystalline solids},",file=f)
+        print("volume = {210},",file=f)
+        print("year = {2022}",file=f)
         print("}",file=f)
 
         if ('brouwer' in tasks) or ('energy' in tasks):
