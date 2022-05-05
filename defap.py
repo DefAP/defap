@@ -2532,18 +2532,7 @@ def stoich(concentrations, defects, host_array,number_of_defects,dopants, x_vari
     #Volatile species must be the last element in the host.
     #Whether a defect contributes to hyper/hypo stoic is determined by input in .defects file. 
 
-    #First, determine the metal and volatile elements' stoichiometry coefficients 
-    stoic_sum=0
-    for i in np.arange(0,host_array[0], 1):
-
-        stoic = Decimal(host_array[2*i+2])
-     
-        if i==host_array[0]-1:
-            volatile_stoic= stoic
-        else:
-            stoic_sum +=stoic
-
-    #Now deterimine defect contributions.
+    stoic_sum = 0
     numerator=0
     denominator=0
     #loop over atoms in host
@@ -2560,16 +2549,15 @@ def stoich(concentrations, defects, host_array,number_of_defects,dopants, x_vari
             if element_change != 0 :
                 contribution += (10**float(concentrations[j+2]))*(-1*element_change)
                 
-        contribution = Decimal(contribution)     
-
+        contribution = Decimal(contribution)
+        contribution +=stoic
         if i == host_array[0]-1:
-            contribution +=stoic
             numerator += contribution
                  
         else:
-            contribution = (contribution/volatile_stoic) + (stoic/stoic_sum)
-            denominator += contribution        
-                
+            denominator += contribution
+            stoic_sum += stoic
+                           
     #Two options for dopants:
             #Stoichiometry = 1 calculates stoichiometry with original cations, considers the cation/volatile species leaving the system in a substitution, but not the dopant added.
             #Stoichiometry = 2 calculates a volatile to metal ratio, where any dopant added is treated as a metal.
@@ -2590,10 +2578,9 @@ def stoich(concentrations, defects, host_array,number_of_defects,dopants, x_vari
                         contribution += (10**float(concentrations[j+2]))*(-1*element_change)
 
                 contribution = Decimal(contribution)
-                contribution = (contribution/volatile_stoic) 
                 denominator += contribution
 
-    final_stoic= -1*((numerator/denominator)-volatile_stoic)
+    final_stoic= -1*((numerator/(denominator/stoic_sum))-stoic)
 
     if  x_variable ==1: #Plotting as a function of stoichiometery
 
@@ -2617,6 +2604,7 @@ def stoich(concentrations, defects, host_array,number_of_defects,dopants, x_vari
             concentrations.append(log_stoichiometry)
          
     return concentrations
+
     
 def print_results(results,seedname):
 
