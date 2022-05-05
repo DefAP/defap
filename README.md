@@ -20,7 +20,7 @@ To operate DefAP, please consult the operating manual included in the software.
 
 For work produced using DefAP, please cite: 
 
-William D.Neilson and Samuel T.Murphy, DefAP: A Python code for the analysis of point defects in crystalline solids, Computational Materials Science 210 (2022) 111434, https://doi.org/10.1016/j.commatsci.2022.111434
+William D. Neilson and Samuel T. Murphy, DefAP: A Python code for the analysis of point defects in crystalline solids, Computational Materials Science 210 (2022) 111434, https://doi.org/10.1016/j.commatsci.2022.111434
 
 ## Contact
 Questions, remarks and contributions should be addressed to wdneilson@outlook.com and samuel.murphy@lancaster.ac.uk
