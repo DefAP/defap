@@ -28,7 +28,7 @@ import platform
 # interest                                          #
 #                                                   #
 # Please cite:                                      #
-# William D.Neilson and Samuel T.Murphy,            #
+# William D. Neilson and Samuel T. Murphy,          #
 # DefAP: A Python code for the analysis of point    # 
 # defects in crystalline solids, Computational      #
 # Materials Science 210 (2022) 111434.              # 
