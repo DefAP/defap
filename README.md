@@ -1,5 +1,7 @@
 ## The Defect Analysis Package (DefAP)
 
+*Latest version (DefAP2.0) recommended and available in same repository. Provides new features (see mmmg.co.uk); input files for previous versions continue to work the same. 
+ 
 DefAP is a program developed to facilitate the exploration of a material's defect chemistry. A large number of features are provided and rapid exploration is supported through the use of autoplotting with carefully considered automatic data labelling and simplification options enabling production of publication quality plots. 
 
 ## Installation
@@ -13,6 +15,8 @@ A gnuplot installation is also required (tested with gnuplot v5.2) and, if using
 ## Usage
 
 To operate DefAP, please consult the operating manual included in the software. 
+
+Additional information and description available at mmmg.co.uk
 
 ## Authors
 - Mr. William Neilson
