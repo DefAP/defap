@@ -16,7 +16,7 @@ A gnuplot installation is also required (tested with gnuplot v5.2) and, if using
 
 To operate DefAP, please consult the operating manual included in the software. 
 
-Additional information and description available at mmmg.co.uk
+Additional information and description available at mmmg.co.uk/defap.
 
 ## Authors
 - Mr. William Neilson
