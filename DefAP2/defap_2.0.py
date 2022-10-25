@@ -13,7 +13,7 @@ import platform
 
 #####################################################
 #                                                   #      
-#           Defect Analysis Package 2.0             #
+#           Defect Analysis Package 2.01            #
 #                                                   #
 #               by Samuel T. Murphy                 #
 #               & William D. Neilson                #
@@ -37,11 +37,11 @@ import platform
 #                                                   #
 #####################################################
 #                                                   #
-# Last updated :  30/09/22                          #
+# Last updated :  25/10/22                          #
 #                                                   #
 #####################################################
 
-version = '2.0'
+version = '2.01'
 
 #Function to print header
 def header():
@@ -1483,7 +1483,7 @@ def calc_chemical_volatile(host_array,constituents,chemical_potentials,host_ener
 
     #Some constants
     std_temp = 298.15
-    std_pressue = 0.2
+    std_pressue = 1
     boltzmann = 0.000086173324
   
     #Extract details for the volatile species
@@ -3165,8 +3165,11 @@ def graphical_output(number_of_defects,min_value,max_value,final_concentrations,
             print("set ylabel 'Fermi level (eV)'\n",sep="", file=f)
             print("plot \"./", fermifile,"\" using 1:2 with lines lt 1 lw 2 lc rgb \"#008cf9\" \\",sep="",file=f)
 
-def form_energies(defects_form,number_of_defects,tasks,bandgap,seedname):
+def form_energies(defects_form,number_of_defects,tasks,bandgap,seedname,entropies, entropy_marker,temperature):
 
+    #Some constants
+    boltzmann = 0.000086173324
+    
     defect_types=[]
     lowest_formation=[]
     formation=[]
@@ -3187,7 +3190,9 @@ def form_energies(defects_form,number_of_defects,tasks,bandgap,seedname):
             defect_name = defects_form[i][0]
             defect_group = defects_form[i][1]
             charge = defects_form[i][4]
-            form_energy = defects_form[i][5]            
+            form_energy = defects_form[i][5]
+            if(entropy_marker == 1):
+                form_energy += (-entropies[i]*temperature)
             
             if ("form_plots" in tasks):
 
@@ -3203,7 +3208,7 @@ def form_energies(defects_form,number_of_defects,tasks,bandgap,seedname):
     print("..> Defect formation energies tabulated in", outputfile)  
      
     if ("form_plots" in tasks):
-        
+     
         #Find lowest formation energy for each class of defect across bandgap
         increment_fermi = 0.001
         i = 0
@@ -3218,6 +3223,8 @@ def form_energies(defects_form,number_of_defects,tasks,bandgap,seedname):
                     group_i=defects_form[w][1]    
                     charge = defects_form[w][4]
                     form_energy = defects_form[w][5]
+                    if(entropy_marker == 1):
+                        form_energy += (-entropies[w]*temperature)
                     if group == group_i:
                         defect_form =charge*i+form_energy
                         defect_group_form_list.append(defect_form) 
@@ -3238,6 +3245,8 @@ def form_energies(defects_form,number_of_defects,tasks,bandgap,seedname):
                 w = int(w)
                 charge = defects_form[w][4]
                 form_energy = defects_form[w][5]
+                if(entropy_marker == 1):
+                    form_energy += (-entropies[w]*temperature)
                 defect_form =charge*i+form_energy
                 defect_form_list.append(defect_form)
 
@@ -4348,7 +4357,7 @@ if ('energy' in tasks):
     defects_form = defect_energies(defects,chemical_potentials,number_of_defects,host_supercell,tab_correction,E_VBM,total_species,use_coul_correction,length,dielectric,v_M,0)
     
     #Print formation energies
-    defect_types=form_energies(defects_form,number_of_defects,tasks,bandgap,seedname)
+    defect_types=form_energies(defects_form,number_of_defects,tasks,bandgap,seedname,entropies, entropy_marker,temperature)
 
     #Perform stability check, if requested.
     if ('stability' in tasks):
