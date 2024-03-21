@@ -1,0 +1,5 @@
+run with:
+python3 ../defap_main.py PuO2
+
+copy relevant defects file from defects_folder to PuO2_defects.csv
+

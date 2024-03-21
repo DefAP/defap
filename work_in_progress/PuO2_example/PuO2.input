@@ -1,0 +1,93 @@
+#Input file for the Defect Analysis Package
+
+#List of tasks to perform 
+# tasks : energy form_plots stability brouwer
+tasks : defect_phases
+
+# define independent variable to loop over, plotted on x-axis
+# 0 = volatile parital pressure | 1 = Temperature | 2 = dopant concentration | 3 = artificial dopant concentration
+loop = 3
+min_value = -15
+max_value = 1
+iterator = 0.5
+
+loop_y = 0
+min_value_y = -25
+max_value_y = -1
+iterator_y = 0.5
+
+# Define type of host lattice 
+Host : Pu-O_2
+Host_energy_pfu :    -36.606574
+Host_energy_supercell : -1171.4104  
+
+# number of functional units in unit cell used to calculate density of states
+fu_unit_cell : 4
+
+# energy of valence band maximum
+E_VBM : 7.853 eV
+
+# Width of material band gap 
+Bandgap : 2.232
+
+# method for calculation chemical potentials
+chem_pot_method : volatile
+
+# volatile chem pot method definition
+Constituents : 2
+O -20
+Al_2-O_3 -39.3451187 -4.111623 -17.455104167
+#Pu-O_2 -36.606574 -17.799819 -10.943 
+
+# method for calculation electron and hole concentrations
+Electron_method : Fermi-Dirac
+Hole_method : Fermi-Dirac
+
+# valence and condunction band limits for fermi-dirac method
+Valence_band_limits : -20 0
+Conduction_band_limits : 2.15 10
+
+# temperature of system
+Temperature = 750
+
+# convergence criteria for total charge
+Charge_convergence : 1e-12
+
+# how stoichiometry is calculated in a material containing a volatile element
+Stoichiometry : 0
+
+# specifiy whether volatile species is an ideal or real gas
+real_gas = 1
+
+# method for calculation defect concentrations
+Defect_conc_method : Boltzmann
+
+# Dopants
+Dopants : 2
+Cl Cl -1.494 4 -2   5
+U  U  -25.00 1 1e-5 10
+
+#Am Am -25.00 1 1e-5 5
+
+secondary_phases : 10
+Pu-Cl_3     -31.2818 
+Pu-O-Cl     -32.526
+U-O_2       -33.391
+U-O_3       -38.872
+U_3-O_8     -111.5953
+U-Cl_3      -26.7624
+U-Cl_4      -29.7943
+U-Cl_5      -31.6955
+U-Cl_6      -33.4201
+U-O_2-Cl_2  -37.8751
+
+#Am-O_2   -28.245
+#Am_2-O_3 -68.585
+#Am-Cl_3  -33.817
+#Am-O-Cl  -35.083
+
+# add charge corrections to defect energies from defects file
+tab_correction : 1
+coulombic_correction : 0
+
+#y_axis_min = -30
