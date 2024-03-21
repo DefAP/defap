@@ -1,0 +1,6 @@
+only volatile chemical potential method available
+only brouwer and defect_phases tasks available
+only Fermi-Dirac electron/hole method available
+only tabulated defect corrections available
+"grouped" defects not fully tested
+requires matplotlib
