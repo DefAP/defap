@@ -1,0 +1,33 @@
+Required packages:
+
+numpy
+scipy
+pandas
+shapely
+pyromat
+decimal
+bisect
+matplotlib
+
+In PuO2_example folder, run using:
+python3 ../defap.py PuO2
+
+
+
+brouwer task produces "brouwer_output" directory
+brouwer diagram can be viewed in this directory by running: python3 plot_brouwer.py
+
+
+
+defect_phase task produces the "defect_phases_output" directory
+python3 plot_defect_phases_main.py plots the phase diagram that considers all defects, all dopants and all secondary phases
+python3 plot_defect_phases_{dopant}.py plots the phase diagram with defects and secondary phases associated with {dopant} only
+
+
+
+formation_energy task produces the "form_eng_output" directory if the host material has a bandgap
+python3 plot_formation_energies.py creates png files for each defect GROUP showing formation energies as a function of Fermi level for all charge states
+python3 plot_min_formation_energies.py creates png files for each defect GROUP showing the minimum formation energy as a function of the Fermi level
+
+if material has no bandgap, then a simple "form_engs.out" file is created that tabulates:
+{defect name} {formation energy}
