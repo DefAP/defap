@@ -1,0 +1,100 @@
+Input file for the Defect Analysis Package
+
+#List of tasks to perform 
+tasks : formation_energy
+#tasks : brouwer group
+#tasks : defect_phases group
+
+# define independent variable to loop over, plotted on x-axis
+loop = 0
+min_value = -50
+max_value = 0
+iterator = 0.25
+
+# secondary loop for defect_phase task
+loop_y = 3
+min_value_y = -50
+max_value_y = 0
+iterator_y = 0.25
+
+# Define type of host lattice 
+Host :                    Pu-O_2
+Host_energy_pfu :        -36.606574
+Host_energy_supercell :  -1171.4104  
+
+# number of functional units in unit cell used to calculate density of states
+fu_unit_cell : 4
+
+# energy of valence band maximum
+E_VBM : 7.853 eV
+
+# Width of material band gap 
+Bandgap : 2.232
+
+# method for calculation chemical potentials
+chem_pot_method : volatile
+
+# volatile chem pot method definition
+# Using MgO as a reference due to using DFT+U for Pu
+Constituents : 2
+O -20
+Mg-O -12.476 -1.731 -6.235
+
+#Al_2-O_3 -39.3451187 -4.111623 -17.455104167
+
+
+# method for calculation electron and hole concentrations
+Electron_method : Fermi-Dirac
+Hole_method : Fermi-Dirac
+
+# valence and condunction band limits for fermi-dirac method
+Valence_band_limits :     -20   0
+Conduction_band_limits :   2.2  10
+
+# temperature of system
+Temperature = 800
+
+# how stoichiometry is calculated in a material containing a volatile element
+Stoichiometry : 1
+
+# specifiy whether volatile species is an ideal or real gas
+real_gas = 1
+
+# method for calculation defect concentrations
+Defect_conc_method : Boltzmann
+
+# Dopants
+# | Name | Reference | chem pot | fitting option | conc / log10(PP) | chem pot range (if fitting conc) |
+Dopants : 3
+Cl Cl -1.494 4 -4.7       
+N  N  -8.272 0 -0.09691   
+H  H  -3.175 0 -20        
+
+## fitting options ##
+# 0 = ignore dopant
+# 1 = fit concentration 
+# 2 = loop over fitted dopant concentration
+# 3 = fixed partial pressure
+# 4 = loop over dopant partial pressure
+# 5 = fixed chemical potential
+
+secondary_phases : 2
+Pu-Cl_3     -31.3689
+Pu-O-Cl     -32.5187
+#Cl_2        -2.988   true
+
+#secondary_phases : 1
+#Pu-N   -27.967142
+#N_2    -16.544000    true
+#N_2-O  -21.099600    true
+
+#secondary_phases : 2
+#Pu-H_2  -24.86122835
+#Pu-H_3  -28.50907221
+
+# Add tabulated correction energies in defecrs file to defect formation energies
+tab_correction : 1
+
+# brouwer axis
+#y_axis_max = 0
+y_axis_min = -15
